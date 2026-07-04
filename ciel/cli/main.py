@@ -10,13 +10,14 @@ def analyze(path: Path = typer.Argument(..., help="Path to the repository to ana
     from ciel.orchestrator.source_role_assignment import assign_role
     from ciel.rag.evidence_extractor import extract_evidence
     from ciel.orchestrator.reasoning_orchestrator import orchestrate_reasoning
+    from ciel.cli.render import render_terminal
     
     files = scan_repository(path)
     roles = [assign_role(f, path) for f in files]
     bundle = extract_evidence(path, roles)
     
     report = orchestrate_reasoning(bundle)
-    typer.echo(report.model_dump_json(indent=2))
+    render_terminal(report)
 
 @app.command()
 def purpose(prompt: str = typer.Argument(..., help="Prompt para resolver el propósito")):
@@ -63,7 +64,22 @@ def report(
     format: str = typer.Option("markdown", "--format", help="Formato de salida (json o markdown)")
 ):
     """Exporta el reporte del análisis."""
-    typer.echo(f"Generating report for repository at {path} in {format} format")
+    from ciel.rag.file_scanner import scan_repository
+    from ciel.orchestrator.source_role_assignment import assign_role
+    from ciel.rag.evidence_extractor import extract_evidence
+    from ciel.orchestrator.reasoning_orchestrator import orchestrate_reasoning
+    from ciel.cli.render import render_json, render_markdown
+    
+    files = scan_repository(path)
+    roles = [assign_role(f, path) for f in files]
+    bundle = extract_evidence(path, roles)
+    
+    report_obj = orchestrate_reasoning(bundle)
+    
+    if format.lower() == "json":
+        typer.echo(render_json(report_obj))
+    else:
+        typer.echo(render_markdown(report_obj))
 
 if __name__ == "__main__":
     app()
