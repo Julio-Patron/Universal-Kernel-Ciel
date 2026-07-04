@@ -1,23 +1,78 @@
-# Node
-node_modules/
-npm-debug.log
-yarn-error.log
-
-# Python
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.sdist
+.pytest_cache/
+pytest-debug.log
+
+# Virtual environments
 venv/
-.env
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
 
-# OS Files
+# Ciel Kernel specific
+memory/decisions.log
+memory/project_profiles/*.json
+!memory/project_profiles/.gitkeep
+ciel_analysis_*.md
+self_analysis.md
+.agents/
+ORIGINAL_REQUEST.md
+node_modules/
+npm-debug.log
+yarn-error.log
+*.local.md
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 .DS_Store
-Thumbs.db
-
-# Agent Logs/State
-.ai-state/
-agent-debug.log
-
-# Tempus DDB Ledger
-keys.json
-tempus.db

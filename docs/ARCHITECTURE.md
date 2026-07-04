@@ -25,27 +25,34 @@ Capa 0 > Capa 1 > Capa 2 > Capa 3 > Capa 4 > Capa 5 > Capa 6
 ```
 
 ### Capa 0 — Core Directive
+
 Autoridad máxima. Define los principios rígidos del kernel. (ej. Proteger foco, Generar valor comercial, Reducir deuda técnica).
 
 ### Capa 1 — Strategic Context
+
 Define los objetivos comerciales o estratégicos vigentes y exclusiones (ej. evitar sobreingeniería).
 Responde: *“¿Hacia dónde vamos?”*
 
 ### Capa 2 — Project Context
+
 Define el perfil analítico y la identidad del repositorio analizado (nombre del repo, lenguaje principal, estado conocido).
 Responde: *“¿Qué sabemos de este proyecto?”*
 
 ### Capa 3 — Task Context & Active Memory
+
 La petición actual del usuario fusionada con correcciones explícitas recientes.
 Responde: *“¿Qué estamos intentando resolver ahora?”*
 
 ### Capa 4 — Evidence RAG
+
 Extracción quirúrgica de datos. Recuperación dirigida de evidencia (README, código fuente, tests). No se recupera información hasta saber qué decisión se intenta tomar.
 
 ### Capa 5 — Session Log
+
 Memoria temporal de la sesión para mantener continuidad, sin mandar sobre evidencia verificable.
 
 ### Capa 6 — Execution Context
+
 Define permisos operativos locales (ej. can_read_files, can_edit_files).
 Responde: *“¿Qué puede hacer Ciel ahora?”*
 
