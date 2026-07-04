@@ -1,0 +1,13 @@
+gap_classifications:
+  implemented:
+    condition: "intention exists and reality confirms it and behavior tests it"
+    action: "Package, document, or deploy."
+  partially_implemented:
+    condition: "intention exists but reality only partially covers it"
+    action: "Validate traction with functional parts before completing."
+  roadmap_gap:
+    condition: "intention exists but reality is missing"
+    action: "Evaluate if it's worth building now."
+  technical_debt:
+    condition: "reality exists but structure is fragile or untested"
+    action: "Refactor before scaling."

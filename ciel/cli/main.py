@@ -6,7 +6,17 @@ app = typer.Typer(help="Ciel Kernel V0 CLI")
 @app.command()
 def analyze(path: Path = typer.Argument(..., help="Path to the repository to analyze")):
     """Ejecuta el análisis completo del repositorio."""
-    typer.echo(f"Analyzing repository at {path}")
+    from ciel.rag.file_scanner import scan_repository
+    from ciel.orchestrator.source_role_assignment import assign_role
+    from ciel.rag.evidence_extractor import extract_evidence
+    from ciel.orchestrator.reasoning_orchestrator import orchestrate_reasoning
+    
+    files = scan_repository(path)
+    roles = [assign_role(f, path) for f in files]
+    bundle = extract_evidence(path, roles)
+    
+    report = orchestrate_reasoning(bundle)
+    typer.echo(report.model_dump_json(indent=2))
 
 @app.command()
 def purpose(prompt: str = typer.Argument(..., help="Prompt para resolver el propósito")):
@@ -32,7 +42,20 @@ def sources(path: Path = typer.Argument(..., help="Path to the repository")):
 @app.command()
 def gap(path: Path = typer.Argument(..., help="Path to the repository")):
     """Ejecuta solo la detección de brecha entre intención y realidad."""
-    typer.echo(f"Detecting gap for repository at {path}")
+    from ciel.rag.file_scanner import scan_repository
+    from ciel.orchestrator.source_role_assignment import assign_role
+    from ciel.rag.evidence_extractor import extract_evidence
+    from ciel.skills.detect_implementation_gap import detect_gap
+    import json
+    
+    files = scan_repository(path)
+    roles = [assign_role(f, path) for f in files]
+    bundle = extract_evidence(path, roles)
+    
+    gap_matrix = detect_gap(bundle)
+    output = [g.model_dump() for g in gap_matrix]
+    
+    typer.echo(json.dumps(output, indent=2))
 
 @app.command()
 def report(

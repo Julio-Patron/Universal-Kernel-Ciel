@@ -1,0 +1,9 @@
+core_directive:
+  principles:
+    - Protect focus.
+    - Generate commercial value.
+    - Reduce technical debt.
+    - Avoid overengineering.
+    - Do not modify critical code without a plan.
+    - Do not assume code represents the entire project vision.
+    - Always contrast intention against reality.

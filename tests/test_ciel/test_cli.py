@@ -4,9 +4,10 @@ from ciel.cli.main import app
 runner = CliRunner()
 
 def test_analyze_command():
-    result = runner.invoke(app, ["analyze", "./repo"])
+    result = runner.invoke(app, ["analyze", "./"])
     assert result.exit_code == 0
-    assert "Analyzing repository at repo" in result.stdout
+    assert "schema_version" in result.stdout
+    assert "ciel.gap_report.v1.0" in result.stdout
 
 def test_purpose_command():
     result = runner.invoke(app, ["purpose", "what to do"])
@@ -21,9 +22,10 @@ def test_sources_command():
     assert "reality" in result.stdout
 
 def test_gap_command():
-    result = runner.invoke(app, ["gap", "./repo"])
+    result = runner.invoke(app, ["gap", "./"])
     assert result.exit_code == 0
-    assert "Detecting gap for repository at repo" in result.stdout
+    assert "claim_id" in result.stdout
+    assert "classification" in result.stdout
 
 def test_report_command():
     result = runner.invoke(app, ["report", "./repo", "--format", "json"])
