@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ciel-kernel"
-version = "0.2.0"
+version = "0.3.0"
 description = "Ciel Kernel V0: Intelligence and Context Governance OS"
 authors = [{ name = "JPatronC92" }]
 readme = "README.md"
