@@ -1,4 +1,7 @@
-# Ciel Kernel
+# Ciel Kernel 🧠⚙️
+
+[![CI](https://github.com/JPatronC92/universal-ai-kernel/actions/workflows/ci.yml/badge.svg)](https://github.com/JPatronC92/universal-ai-kernel/actions/workflows/ci.yml)
+[![PyPI version](https://badge.fury.io/py/ciel-kernel.svg)](https://badge.fury.io/py/ciel-kernel)
 
 Ciel Kernel is a local-first repository audit CLI for comparing documented intent against code reality. It scans a repository, classifies files, extracts implementation evidence, detects gaps, and emits structured reports.
 

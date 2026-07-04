@@ -34,7 +34,7 @@ jobs:
           python -m pip install build twine
 
       - name: Run tests
-        run: python -m pytest
+        run: python -m pytest tests/ --cov=ciel --cov-fail-under=70
 
       - name: Build distribution
         run: python -m build
