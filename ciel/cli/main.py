@@ -5,18 +5,40 @@ app = typer.Typer(help="Ciel Kernel V0 CLI")
 
 @app.command()
 def analyze(path: Path = typer.Argument(..., help="Path to the repository to analyze")):
-    """Ejecuta el análisis completo del repositorio."""
+    """Ejecuta el análisis completo del repositorio a través del ciclo cognitivo V2."""
     from ciel.rag.file_scanner import scan_repository
     from ciel.orchestrator.source_role_assignment import assign_role
     from ciel.rag.evidence_extractor import extract_evidence
     from ciel.orchestrator.reasoning_orchestrator import orchestrate_reasoning
     from ciel.cli.render import render_terminal
+    from ciel.orchestrator.purpose_resolver import resolve_purpose
+    import time
     
+    typer.secho("\n[COGNITIVE CYCLE START] Initializing Ciel V2 Intelligence Layer...", fg=typer.colors.CYAN, bold=True)
+    
+    # Phase 11: Purpose Resolution
+    typer.echo("\n>> Phase 11: Resolving Project Purpose from Documentation...")
+    start_time = time.time()
+    purpose_obj = resolve_purpose(
+        "Analyze this repository and identify gaps between documentation intent and code reality.", 
+        repo_path=str(path)
+    )
+    typer.secho(f"   [OK] Identified Task: {purpose_obj.task.type} | {purpose_obj.purpose.primary_question}", fg=typer.colors.GREEN)
+    
+    # Phase 12: Evidence Extraction
+    typer.echo("\n>> Phase 12: Extracting Implementation Facts from Reality...")
     files = scan_repository(path)
     roles = [assign_role(f, path) for f in files]
     bundle = extract_evidence(path, roles)
+    typer.secho(f"   [OK] Extracted {len(bundle.implementation_facts)} Implementation Facts & {len(bundle.intention_claims)} Intention Claims.", fg=typer.colors.GREEN)
     
+    # Phase 13 & 14: Gap Detection & Maturity Audit
+    typer.echo("\n>> Phase 13 & 14: Semantic Reasoning & Gap Auditing...")
     report = orchestrate_reasoning(bundle)
+    
+    elapsed = time.time() - start_time
+    typer.secho(f"\n[COGNITIVE CYCLE COMPLETE] Finished in {elapsed:.2f}s.\n", fg=typer.colors.CYAN, bold=True)
+    
     render_terminal(report)
 
 @app.command()
