@@ -7,7 +7,7 @@ from ciel.schemas.evidence import EvidenceBundle, ProjectInfo, IntentionClaim, I
 @pytest.fixture
 def dummy_bundle():
     return EvidenceBundle(
-        project=ProjectInfo(name="Test"),
+        project=ProjectInfo(name="Test", primary_language="python"),
         intention_claims=[
             IntentionClaim(id="c1", source_id="s1", claim="Must do X")
         ],
