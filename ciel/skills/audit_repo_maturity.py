@@ -2,7 +2,7 @@ import json
 import logging
 from typing import List, Tuple
 
-from ciel.inference.local_inference_adapter import query_ollama
+from ciel.inference.model_router import route_inference
 from ciel.orchestrator.purpose_resolver import extract_json_block
 from ciel.schemas.evidence import EvidenceBundle
 from ciel.schemas.gap_report import GapMatrixItem, MaturityScore, NextAction, Verdict
@@ -80,7 +80,7 @@ def audit_maturity(bundle: EvidenceBundle, gaps: list[GapMatrixItem]) -> Tuple[M
     prompt = "Return JSON maturity_score, verdict and next_actions for this gap summary: " + json.dumps(gaps_summary)
 
     try:
-        response_text = query_ollama(prompt)
+        response_text = route_inference(prompt)
         if response_text.startswith("Error"):
             return audit_maturity_fallback(bundle, gaps)
 

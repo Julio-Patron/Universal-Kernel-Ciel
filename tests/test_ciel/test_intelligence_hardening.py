@@ -17,7 +17,7 @@ def sample_bundle():
 
 
 def test_gap_fallback_uses_matching_evidence():
-    with patch("ciel.skills.detect_implementation_gap.query_ollama", return_value="not-json"):
+    with patch("ciel.skills.detect_implementation_gap.route_inference", return_value="not-json"):
         gaps = detect_gap(sample_bundle())
     assert gaps[0].status == "implemented"
     assert gaps[0].evidence == ["f1"]
@@ -25,7 +25,7 @@ def test_gap_fallback_uses_matching_evidence():
 
 def test_maturity_fallback_uses_evidence_counts():
     gap = GapMatrixItem(claim_id="c1", claim="c", status="implemented", classification="production_ready", evidence=["f1"], severity="low", interpretation="i", recommended_action="r")
-    with patch("ciel.skills.audit_repo_maturity.query_ollama", return_value="Error"):
+    with patch("ciel.skills.audit_repo_maturity.route_inference", return_value="Error"):
         score, verdict, actions = audit_maturity(sample_bundle(), [gap])
     assert score.implementation_completeness == 1.0
     assert verdict.stage == "technical_core_ready"

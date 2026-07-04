@@ -41,7 +41,7 @@ class MyClass {}
     assert "MyClass" in facts[1].fact
     assert "py_func" in facts[2].fact
 
-@patch("ciel.rag.evidence_extractor.query_ollama")
+@patch("ciel.rag.evidence_extractor.route_inference")
 def test_llm_facts_valid(mock_query):
     mock_query.return_value = """```json
 [
@@ -54,7 +54,7 @@ def test_llm_facts_valid(mock_query):
     assert len(facts) == 1
     assert facts[0].fact == "Does advanced stuff"
 
-@patch("ciel.rag.evidence_extractor.query_ollama")
+@patch("ciel.rag.evidence_extractor.route_inference")
 def test_llm_facts_fallback_on_error(mock_query, tmp_path):
     # Simulate a network error connecting to Ollama
     mock_query.return_value = "Error connecting to local inference: Connection refused"

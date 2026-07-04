@@ -8,7 +8,7 @@ from ciel.schemas.evidence import SourceFile
 def test_static_python_parser_extracts_function():
     repo_path = Path("repo")
     sources = [SourceFile(id="main.py", path="main.py", role="reality", confidence=1.0)]
-    with patch("ciel.rag.evidence_extractor.query_ollama", return_value="not-json"), patch.object(Path, "exists", return_value=True), patch.object(Path, "read_text", return_value="def hello():\n    pass"):
+    with patch("ciel.rag.evidence_extractor.route_inference", return_value="not-json"), patch.object(Path, "exists", return_value=True), patch.object(Path, "read_text", return_value="def hello():\n    pass"):
         bundle = extract_evidence(repo_path, sources)
     assert bundle.implementation_facts[0].fact == "Defines function hello"
 

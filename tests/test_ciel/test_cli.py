@@ -40,10 +40,10 @@ def test_report_command():
 
 from unittest.mock import patch
 
-@patch("ciel.orchestrator.purpose_resolver.query_ollama")
-@patch("ciel.rag.evidence_extractor.query_ollama")
-@patch("ciel.skills.detect_implementation_gap.query_ollama")
-@patch("ciel.skills.audit_repo_maturity.query_ollama")
+@patch("ciel.orchestrator.purpose_resolver.route_inference")
+@patch("ciel.rag.evidence_extractor.route_inference")
+@patch("ciel.skills.detect_implementation_gap.route_inference")
+@patch("ciel.skills.audit_repo_maturity.route_inference")
 def test_analyze_command_offline_fallback(mock_audit, mock_detect, mock_extract, mock_purpose):
     error_msg = "Error connecting to local inference: connection refused"
     mock_purpose.return_value = error_msg

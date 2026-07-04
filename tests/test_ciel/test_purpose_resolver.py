@@ -71,7 +71,7 @@ def test_scan_documentation_context(tmp_path):
     assert "doc3.md" in context
     assert "doc4.md" not in context
 
-@patch("ciel.orchestrator.purpose_resolver.query_ollama")
+@patch("ciel.orchestrator.purpose_resolver.route_inference")
 def test_resolve_purpose_llm_success(mock_query):
     # Mock successful LLM response conforming to schema
     mock_query.return_value = """
@@ -103,17 +103,17 @@ def test_resolve_purpose_llm_success(mock_query):
     assert result.purpose.primary_question == "What is the custom question?"
     assert len(result.purpose.success_criteria) == 3
 
-@patch("ciel.orchestrator.purpose_resolver.query_ollama")
+@patch("ciel.orchestrator.purpose_resolver.route_inference")
 def test_resolve_purpose_ollama_error_fallback(mock_query):
-    # query_ollama returning error message
+    # route_inference returning error message
     mock_query.return_value = "Error connecting to local inference: Connection refused"
     
     result = resolve_purpose("harden security")
     assert result.task.type == "core_hardening"
 
-@patch("ciel.orchestrator.purpose_resolver.query_ollama")
+@patch("ciel.orchestrator.purpose_resolver.route_inference")
 def test_resolve_purpose_invalid_json_fallback(mock_query):
-    # query_ollama returning malformed JSON
+    # route_inference returning malformed JSON
     mock_query.return_value = "```json\n{ malformed: json }\n```"
     
     result = resolve_purpose("refactor codebase")

@@ -3,7 +3,7 @@ import logging
 import re
 from typing import List
 
-from ciel.inference.local_inference_adapter import query_ollama
+from ciel.inference.model_router import route_inference
 from ciel.orchestrator.purpose_resolver import extract_json_block
 from ciel.schemas.evidence import EvidenceBundle
 from ciel.schemas.gap_report import GapMatrixItem
@@ -93,7 +93,7 @@ def detect_gap(bundle: EvidenceBundle) -> List[GapMatrixItem]:
     )
 
     try:
-        response_text = query_ollama(prompt)
+        response_text = route_inference(prompt)
         if response_text.startswith("Error"):
             return detect_gap_fallback(bundle)
 

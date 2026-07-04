@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from ciel.schemas.purpose import PurposeObject, TaskInfo, PurposeCriteria
-from ciel.inference.local_inference_adapter import query_ollama
+from ciel.inference.model_router import route_inference
 
 logger = logging.getLogger(__name__)
 
@@ -217,11 +217,11 @@ Rules:
 
     # 4. Attempt LLM Query
     try:
-        response_text = query_ollama(llm_prompt, model="llama3")
+        response_text = route_inference(llm_prompt)
         
-        # Check if query_ollama returned an error string
-        if response_text.startswith("Error connecting to local inference:"):
-            logger.warning(f"Ollama connection error: {response_text}. Falling back to static dictionary.")
+        # Check if route_inference returned an error string
+        if response_text.startswith("Error connecting to"):
+            logger.warning(f"Inference connection error: {response_text}. Falling back to static dictionary.")
             return get_static_fallback(prompt)
             
         # Parse JSON
