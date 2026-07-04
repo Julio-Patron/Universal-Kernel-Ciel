@@ -1,43 +1,56 @@
-# Ciel Kernel 🧠⚙️
+# Ciel Kernel
 
-A polyvalent "Operating System" designed to govern AI Coding Agents. It prevents hallucinations, forces strict architectural adherence, and turns conversational AI into a disciplined, execution-oriented software engineer.
+Ciel Kernel is a local-first repository audit CLI for comparing documented intent against code reality. It scans a repository, classifies files, extracts implementation evidence, detects gaps, and emits structured reports.
 
-With the **Intelligence Release (V0.2.x)**, Ciel now integrates Local LLM-driven Semantic Analysis (via Ollama) to automatically detect gaps between documented intentions and actual code reality.
+Ollama can improve semantic extraction when available, but deterministic fallbacks are part of the core contract.
 
-## 🚀 Key Features
+## Features
 
-* **LLM-Powered Purpose Resolution:** Dynamically extracts the repository's semantic intent from documentation.
-* **Intelligent Evidence Extraction:** Analyzes source code to extract actual implementation facts.
-* **Semantic Implementation Gap Detection:** Uses AI to find contradictions, missing features, and technical debt between intention and reality.
-* **Maturity Auditing:** Generates a structured cognitive diagnostic of the repository's readiness state.
-* **Resilient Fallbacks:** Deterministic fallback mechanisms ensure Ciel keeps working even if the LLM is offline or returns malformed data.
+- Purpose resolution from prompts and repository documentation.
+- Evidence extraction from source code and project metadata.
+- Gap detection with specific evidence IDs.
+- Repository maturity scoring based on claims, implementation evidence, tests, and operational manifests.
+- Offline-safe fallback mode for CI and machines without Ollama.
 
-## 🛠️ Usage
-
-Install the Ciel Kernel CLI:
+## Install
 
 ```bash
 pip install -e .
 ```
 
-Run a full cognitive diagnostic on any repository:
+## Run
 
 ```bash
 ciel analyze ./path/to/repo
+ciel report ./path/to/repo --format markdown
+ciel gap ./path/to/repo
+ciel sources ./path/to/repo
+ciel purpose "audit this repo for release readiness"
 ```
 
-Other granular commands:
+## Runtime configuration
 
-* `ciel purpose "Make a web app"` - Resolves ambiguous intent into a concrete Purpose Object.
-* `ciel sources ./repo` - Classifies source files into Roles (intention vs. reality).
-* `ciel gap ./repo` - Detects implementation gaps.
-* `ciel report ./repo --format markdown` - Generates a comprehensive markdown report.
+```bash
+CIEL_OLLAMA_URL=http://localhost:11434
+CIEL_OLLAMA_MODEL=llama3
+CIEL_LLM_TIMEOUT=10
+CIEL_DISABLE_LLM=0
+CIEL_ENABLE_EXEC=0
+CIEL_EXEC_TIMEOUT=30
+```
 
-## 📂 Core Structure
+For deterministic CI runs:
 
-* `AGENTS.md`: The supreme mandate. Overrides the AI's default helpful/chatty personality with strict engineering discipline.
-* `ciel/`: The core Python package powering the intelligent OS.
-  * `cli/`: Command-line interface orchestration.
-  * `skills/`: Execution and reasoning SOPs (e.g., Gap Detection, Maturity Audit).
-  * `rag/`: Document retrieval and evidence extraction capabilities.
-  * `inference/`: LLM adapters (currently supporting local Ollama).
+```bash
+CIEL_DISABLE_LLM=1 CIEL_ENABLE_EXEC=0 python -m pytest
+```
+
+## Core structure
+
+- `ciel/cli/`: Typer CLI entrypoints.
+- `ciel/rag/`: repository scanning and evidence extraction.
+- `ciel/orchestrator/`: purpose and reasoning orchestration.
+- `ciel/skills/`: gap detection, maturity audit, product boundary detection, and planning helpers.
+- `ciel/schemas/`: Pydantic schemas for purpose, evidence, and reports.
+- `ciel/inference/`: local inference adapters.
+- `ciel/executor/`: approval-gated command and filesystem helpers.
