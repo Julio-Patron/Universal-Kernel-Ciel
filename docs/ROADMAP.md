@@ -68,3 +68,79 @@ json renderer
 markdown renderer
 ```
 Objetivo: Entregar reportes usables por humanos y agentes.
+
+¡Entendido, Julio! Con las Fases 0 a 5 ya implementadas, Ciel V0 ha alcanzado su *Definition of Done* como un motor de diagnóstico estático. El sistema ya sabe leer, asignar roles, clasificar evidencia, detectar la brecha de implementación y recomendar.
+
+El siguiente bloque del roadmap marca la transición de **Ciel V0 (Repo Intelligence)** hacia **Ciel V1 (Execution & Context Governance)**. Basándonos en las reglas de arquitectura establecidas (y la necesidad de procesar repositorios complejos como `tempus-mcp` o laboratorios de aislamiento como `Decision-Database`), aquí tienes la continuación oficial del documento `ROADMAP.md`.
+
+---
+
+## Fase 6 — Multi-Product & Boundary Detection
+
+Implementar la separación de contextos para repositorios no monolíticos:
+
+```txt
+detect_product_boundaries.py
+context_separator.py
+
+```
+
+Objetivo: Identificar límites internos de producto dentro de un mismo repositorio (ej. separar un motor de evaluación en Rust de sus bindings o SDKs). Condición estricta para poder auditar proyectos compuestos como `tempus-mcp` sin mezclar intenciones ni realidades.
+
+---
+
+## Fase 7 — Capa de Ejecución Controlada (The Executor)
+
+Implementar el puente entre la recomendación y la acción física:
+
+```txt
+shell_executor.py
+filesystem_manager.py
+approval_gate.py
+
+```
+
+Objetivo: Permitir que Ciel ejecute acciones técnicas (crear archivos, mover directorios, compilar empaquetados) utilizando herramientas del sistema. Toda acción destructiva o de escritura requiere pasar por el `approval_gate` (aprobación humana explícita en la terminal).
+
+---
+
+## Fase 8 — Integración de Bitácora (Memory & Ledger)
+
+Implementar la persistencia del razonamiento:
+
+```txt
+memory_writer.py
+decision_ledger_adapter.py
+decisions.log
+
+```
+
+Objetivo: Guardar el registro inmutable de las brechas detectadas y las acciones tomadas. Esta fase sienta las bases técnicas para conectar Ciel Kernel con infraestructuras de memoria y auditoría externa (alineado con la filosofía TempusDDB).
+
+---
+
+## Fase 9 — Local-First & Air-Gapped Backend
+
+Implementar adaptadores para ejecución sin dependencias de nube:
+
+```txt
+local_inference_adapter.py
+model_router.py
+
+```
+
+Objetivo: Asegurar que el *Reasoning Orchestrator* pueda conectarse a modelos locales (vía Ollama o binarios compilados), garantizando privacidad total y operabilidad en entornos de hardware restringido o terminales nativas.
+
+---
+
+## Fase 10 — Resolución Autónoma de Deuda Técnica (V1 Release)
+
+Implementar el ciclo continuo de reparación:
+
+```txt
+technical_debt_resolver.py
+auto_refactor_planner.py
+
+```
+
+Objetivo: Alcanzar la madurez de V1. Ciel no solo diagnostica la brecha, sino que genera un plan de refactorización paso a paso, pide permiso mediante el `approval_gate` y ejecuta los comandos necesarios para limpiar el código, aislar módulos y reducir la deuda técnica detectada en la Fase 4.
