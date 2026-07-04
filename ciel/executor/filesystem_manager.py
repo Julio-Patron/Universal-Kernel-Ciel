@@ -21,3 +21,15 @@ def write_file(path: Path, content: str, require_approval: bool = True) -> bool:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
     return True
+
+def append_file(path: Path, content: str, require_approval: bool = True) -> bool:
+    """Appends content to a file."""
+    if require_approval:
+        approved = request_approval(f"Append to file: {path}")
+        if not approved:
+            return False
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as f:
+        f.write(content)
+    return True
