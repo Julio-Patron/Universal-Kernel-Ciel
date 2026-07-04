@@ -27,6 +27,7 @@ ciel analyze ./path/to/repo
 ```
 
 Other granular commands:
+
 * `ciel purpose "Make a web app"` - Resolves ambiguous intent into a concrete Purpose Object.
 * `ciel sources ./repo` - Classifies source files into Roles (intention vs. reality).
 * `ciel gap ./repo` - Detects implementation gaps.
