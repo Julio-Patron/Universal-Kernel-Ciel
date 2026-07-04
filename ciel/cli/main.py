@@ -12,7 +12,10 @@ def analyze(path: Path = typer.Argument(..., help="Path to the repository to ana
     from ciel.orchestrator.reasoning_orchestrator import orchestrate_reasoning
     from ciel.cli.render import render_terminal
     from ciel.orchestrator.purpose_resolver import resolve_purpose
+    from ciel.memory.decision_ledger import DecisionLedger
     import time
+    
+    ledger = DecisionLedger(path)
     
     typer.secho("\n[COGNITIVE CYCLE START] Initializing Ciel V2 Intelligence Layer...", fg=typer.colors.CYAN, bold=True)
     
@@ -23,6 +26,11 @@ def analyze(path: Path = typer.Argument(..., help="Path to the repository to ana
         "Analyze this repository and identify gaps between documentation intent and code reality.", 
         repo_path=str(path)
     )
+    ledger.record_decision(
+        "purpose_resolution", 
+        context="Analyze this repository and identify gaps between documentation intent and code reality.",
+        decision={"task": purpose_obj.task.type, "question": purpose_obj.purpose.primary_question}
+    )
     typer.secho(f"   [OK] Identified Task: {purpose_obj.task.type} | {purpose_obj.purpose.primary_question}", fg=typer.colors.GREEN)
     
     # Phase 12: Evidence Extraction
@@ -30,11 +38,21 @@ def analyze(path: Path = typer.Argument(..., help="Path to the repository to ana
     files = scan_repository(path)
     roles = [assign_role(f, path) for f in files]
     bundle = extract_evidence(path, roles)
+    ledger.record_decision(
+        "evidence_extraction",
+        context={"files_scanned": len(files), "path": str(path)},
+        decision={"facts": len(bundle.implementation_facts), "claims": len(bundle.intention_claims)}
+    )
     typer.secho(f"   [OK] Extracted {len(bundle.implementation_facts)} Implementation Facts & {len(bundle.intention_claims)} Intention Claims.", fg=typer.colors.GREEN)
     
     # Phase 13 & 14: Gap Detection & Maturity Audit
     typer.echo("\n>> Phase 13 & 14: Semantic Reasoning & Gap Auditing...")
     report = orchestrate_reasoning(bundle)
+    ledger.record_decision(
+        "maturity_audit",
+        context={"bundle_size": len(bundle.implementation_facts)},
+        decision={"maturity_score": report.maturity_score.model_dump(), "verdict": report.verdict.model_dump()}
+    )
     
     elapsed = time.time() - start_time
     typer.secho(f"\n[COGNITIVE CYCLE COMPLETE] Finished in {elapsed:.2f}s.\n", fg=typer.colors.CYAN, bold=True)
@@ -102,6 +120,42 @@ def report(
         typer.echo(render_json(report_obj))
     else:
         typer.echo(render_markdown(report_obj))
+
+memory_app = typer.Typer(help="Manage Ciel Kernel memory and decision ledger")
+app.add_typer(memory_app, name="memory")
+
+@memory_app.command("init")
+def memory_init(path: Path = typer.Argument(..., help="Path to the repository")):
+    """Inicializa la memoria local."""
+    from ciel.memory.decision_ledger import DecisionLedger
+    ledger = DecisionLedger(path)
+    ledger._ensure_dir()
+    typer.secho("Memory ledger initialized.", fg=typer.colors.GREEN)
+
+@memory_app.command("status")
+def memory_status(path: Path = typer.Argument(..., help="Path to the repository")):
+    """Revisa el estado de la cadena criptográfica de memoria."""
+    from ciel.memory.decision_ledger import DecisionLedger
+    ledger = DecisionLedger(path)
+    if not ledger.log_path.exists():
+        typer.secho("No memory ledger found.", fg=typer.colors.YELLOW)
+        return
+    if ledger.verify_chain():
+        typer.secho("Ledger status: OK (Chain verified)", fg=typer.colors.GREEN)
+    else:
+        typer.secho("Ledger status: CORRUPTED (Hash mismatch detected)", fg=typer.colors.RED)
+
+@memory_app.command("verify")
+def memory_verify(path: Path = typer.Argument(..., help="Path to the repository")):
+    """Verifica estrictamente el ledger y sale con error si está corrupto."""
+    import sys
+    from ciel.memory.decision_ledger import DecisionLedger
+    ledger = DecisionLedger(path)
+    if ledger.verify_chain():
+        typer.secho("Ledger verified successfully.", fg=typer.colors.GREEN)
+    else:
+        typer.secho("Ledger verification failed!", fg=typer.colors.RED)
+        sys.exit(1)
 
 if __name__ == "__main__":
     app()

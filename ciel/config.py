@@ -44,6 +44,7 @@ class CielSettings:
     gemini_model: str = "gemini-1.5-flash"
     llm_timeout_seconds: int = 10
     disable_llm: bool = False
+    disable_memory: bool = False
     enable_shell: bool = False
     shell_timeout_seconds: int = 30
     allowed_commands: Tuple[str, ...] = ("python", "pytest", "git", "pip")
@@ -62,6 +63,7 @@ class CielSettings:
             gemini_model=os.getenv("CIEL_GEMINI_MODEL", cls.gemini_model),
             llm_timeout_seconds=env_int("CIEL_LLM_TIMEOUT", cls.llm_timeout_seconds),
             disable_llm=env_bool("CIEL_DISABLE_LLM", cls.disable_llm),
+            disable_memory=env_bool("CIEL_DISABLE_MEMORY", cls.disable_memory),
             enable_shell=env_bool("CIEL_ENABLE_EXEC", cls.enable_shell),
             shell_timeout_seconds=env_int("CIEL_EXEC_TIMEOUT", cls.shell_timeout_seconds, 1, 600),
             allowed_commands=env_tuple("CIEL_ALLOWED_COMMANDS", cls.allowed_commands),
