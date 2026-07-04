@@ -6,8 +6,10 @@ from ciel.schemas.evidence import (
     ProjectInfo,
     IntentionClaim,
     ImplementationFact,
-    BehaviorEvidence
+    BehaviorEvidence,
+    OperationalEvidence
 )
+from collections import Counter
 import re
 
 def extract_evidence(repo_path: Path, sources: List[SourceFile]) -> EvidenceBundle:
@@ -15,6 +17,7 @@ def extract_evidence(repo_path: Path, sources: List[SourceFile]) -> EvidenceBund
     claims = []
     facts = []
     behaviors = []
+    operations = []
     
     claim_counter = 1
     fact_counter = 1
@@ -61,10 +64,33 @@ def extract_evidence(repo_path: Path, sources: List[SourceFile]) -> EvidenceBund
                 evidence="Found test definitions",
                 evidence_type="test_suite"
             ))
+            
+        elif src.role == "operational_maturity":
+            operations.append(OperationalEvidence(
+                id=f"o{len(operations)+1}",
+                source_id=src.id,
+                evidence=f"Found operational manifest: {abs_path.name}",
+                evidence_type="manifest"
+            ))
+
+    # Detect primary language based on 'reality' extensions
+    exts = [Path(src.path).suffix.lower() for src in sources if src.role == "reality" and Path(src.path).suffix]
+    
+    lang_map = {
+        ".py": "Python", ".js": "JavaScript", ".ts": "TypeScript", 
+        ".go": "Go", ".rs": "Rust", ".java": "Java", 
+        ".cpp": "C++", ".c": "C"
+    }
+    
+    if exts:
+        most_common_ext = Counter(exts).most_common(1)[0][0]
+        primary_language = lang_map.get(most_common_ext, "Unknown")
+    else:
+        primary_language = "Unknown"
 
     project_info = ProjectInfo(
         name=repo_path.name,
-        primary_language="Python" # Hardcoded for now
+        primary_language=primary_language
     )
     
     return EvidenceBundle(
@@ -72,5 +98,6 @@ def extract_evidence(repo_path: Path, sources: List[SourceFile]) -> EvidenceBund
         sources=sources,
         intention_claims=claims,
         implementation_facts=facts,
-        behavior_evidence=behaviors
+        behavior_evidence=behaviors,
+        operational_evidence=operations
     )

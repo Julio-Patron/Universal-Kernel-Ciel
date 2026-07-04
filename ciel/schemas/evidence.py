@@ -29,6 +29,12 @@ class BehaviorEvidence(BaseModel):
     evidence: str
     evidence_type: str
 
+class OperationalEvidence(BaseModel):
+    id: str
+    source_id: str
+    evidence: str
+    evidence_type: str
+
 class EvidenceBundle(BaseModel):
     schema_version: str = "ciel.evidence.v1.0"
     project: ProjectInfo
@@ -36,3 +42,4 @@ class EvidenceBundle(BaseModel):
     intention_claims: List[IntentionClaim]
     implementation_facts: List[ImplementationFact]
     behavior_evidence: List[BehaviorEvidence]
+    operational_evidence: List[OperationalEvidence] = []
