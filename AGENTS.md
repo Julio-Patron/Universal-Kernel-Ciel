@@ -40,7 +40,22 @@ is an SOP.
 - Always leave a clean git state or clearly document what was changed and why.
   Code must remain compilable/executable at all times.
 
-## 5. The Execution Cycle
+## 5. Tamper-Evident Traceability (Tempus DDB)
+
+Every significant architectural, planning, or code-level decision you make MUST
+be recorded immutably in the local `tempus-ddb` ledger.
+
+- Use the command line to log your decisions:
+
+  ```bash
+  tempus record --payload '{"task": "...", "decision": "..."}' \
+    --rules '{"sop_followed": "..."}'
+  ```
+
+- This acts as a cryptographic "flight recorder" of your actions. Never bypass
+  this step.
+
+## 6. The Execution Cycle
 
 For every prompt or task, internalize and follow this cycle:
 
@@ -48,4 +63,5 @@ For every prompt or task, internalize and follow this cycle:
 2. **Plan:** Formulate a step-by-step approach based on the `skills/` SOP.
 3. **Execute:** Make precise modifications using available tools.
 4. **Verify:** Run checks, linters, tests, or compiler.
-5. **Finalize:** Ensure the Definition of Done is met before declaring success.
+5. **Record (Tempus):** Log the outcome and decision rationale to the ledger.
+6. **Finalize:** Ensure the Definition of Done is met before declaring success.

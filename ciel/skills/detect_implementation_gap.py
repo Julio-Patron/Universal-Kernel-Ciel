@@ -6,13 +6,14 @@ def detect_gap(bundle: EvidenceBundle) -> List[GapMatrixItem]:
     """Compares intention claims with reality facts to produce gap matrix."""
     gaps = []
     
-    # Very basic static comparison logic for V0
+    # PROVISIONAL SCAFFOLD: Very naive semantic matching simulation via word count.
+    # This is NOT production-grade reasoning and serves only as a Phase 4 placeholder.
     facts_str = " ".join([f.fact.lower() for f in bundle.implementation_facts])
     
     for claim in bundle.intention_claims:
         claim_text = claim.claim.lower()
         
-        # Super naive semantic matching simulation
+        # Naive keyword intersection
         if any(word in facts_str for word in claim_text.split() if len(word) > 4):
             status = "implemented"
             classification = "production_ready"
