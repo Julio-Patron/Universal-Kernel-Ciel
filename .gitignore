@@ -62,6 +62,12 @@ memory/project_profiles/*.json
 !memory/project_profiles/.gitkeep
 ciel_analysis_*.md
 self_analysis.md
+.agents/
+ORIGINAL_REQUEST.md
+node_modules/
+npm-debug.log
+yarn-error.log
+*.local.md
 
 # IDEs and Editors
 .vscode/
