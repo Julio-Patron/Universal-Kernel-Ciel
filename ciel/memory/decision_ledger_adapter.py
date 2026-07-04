@@ -1,11 +1,13 @@
 import json
 from pathlib import Path
 from datetime import datetime
+from ciel.executor.filesystem_manager import create_directory, append_file
 
 def log_decision(memory_dir: Path, context: str, decision: str, reason: str):
     """Appends an immutable decision record to the decisions.log file."""
     log_path = memory_dir / "decisions.log"
-    log_path.parent.mkdir(parents=True, exist_ok=True)
+    # Internal writes are permitted without explicit user approval
+    create_directory(log_path.parent, require_approval=False)
     
     entry = {
         "timestamp": datetime.now().isoformat(),
@@ -14,5 +16,5 @@ def log_decision(memory_dir: Path, context: str, decision: str, reason: str):
         "reason": reason
     }
     
-    with log_path.open("a", encoding="utf-8") as f:
-        f.write(json.dumps(entry) + "\n")
+    # Internal writes are permitted without explicit user approval
+    append_file(log_path, json.dumps(entry) + "\n", require_approval=False)
