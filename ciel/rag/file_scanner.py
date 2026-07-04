@@ -14,7 +14,10 @@ def scan_repository(repo_path: Path) -> List[Path]:
     
     for root, dirs, files in os.walk(repo_path):
         # Mutate dirs in-place to avoid traversing ignored directories
-        dirs[:] = [d for d in dirs if d not in IGNORE_DIRS and not d.startswith(".")]
+        dirs[:] = [
+            d for d in dirs 
+            if d not in IGNORE_DIRS and (not d.startswith(".") or d == ".github")
+        ]
         
         for file in files:
             file_path = Path(root) / file
