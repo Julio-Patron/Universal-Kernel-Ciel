@@ -23,3 +23,7 @@ dev = [
 
 [project.scripts]
 ciel = "ciel.cli.main:app"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["core*", "ciel*", "skills*", "memory*"]
