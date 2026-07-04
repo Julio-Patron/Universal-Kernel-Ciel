@@ -9,7 +9,7 @@ def dummy_bundle():
     return EvidenceBundle(
         project=ProjectInfo(name="Test", primary_language="python"),
         intention_claims=[
-            IntentionClaim(id="c1", source_id="s1", claim="Must do X")
+            IntentionClaim(id="c1", source_id="s1", claim="Must do X", claim_type="architectural_decision")
         ],
         implementation_facts=[
             ImplementationFact(id="f1", source_id="s2", fact="Does X", fact_type="implemented_capability")
