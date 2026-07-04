@@ -105,7 +105,7 @@ Docker, CI/CD y release configs representan la **Operación**.
 
 La fricción entre intención y realidad produce el:
 
-# Implementation Gap
+## Implementation Gap
 
 ---
 

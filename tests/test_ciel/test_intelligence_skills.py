@@ -14,7 +14,8 @@ def dummy_bundle():
         implementation_facts=[
             ImplementationFact(id="f1", source_id="s2", fact="Does X", fact_type="implemented_capability")
         ],
-        behavior_evidence=[]
+        behavior_evidence=[],
+        sources=[]
     )
 
 @patch("ciel.skills.detect_implementation_gap.query_ollama")

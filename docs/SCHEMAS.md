@@ -1,6 +1,7 @@
 # Ciel Kernel JSON Contracts and Schemas
 
 ## 1. Purpose Resolver Schema
+
 Convierte una petición ambigua en una decisión concreta.
 
 ```json
@@ -24,6 +25,7 @@ Convierte una petición ambigua en una decisión concreta.
 ```
 
 ## 2. Source Role Assignment Schema
+
 Clasifica fuentes antes del RAG basado en ruta, nombre y extensión.
 
 ```json
@@ -39,6 +41,7 @@ Clasifica fuentes antes del RAG basado en ruta, nombre y extensión.
 ```
 
 ## 3. Evidence Bundle Schema
+
 Contrato estructurado que consolida claims y hechos. Las skills solo leen el `EvidenceBundle`.
 
 ```json
@@ -83,6 +86,7 @@ Contrato estructurado que consolida claims y hechos. Las skills solo leen el `Ev
 ```
 
 ## 4. Implementation Gap Report Schema
+
 Salida canónica del análisis.
 
 ```json
