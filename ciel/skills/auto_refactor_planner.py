@@ -1,18 +1,85 @@
-from typing import List, Dict
-from ciel.schemas.gap_report import GapMatrixItem
+import json
+import uuid
+import logging
+from typing import List, Optional
 
-def generate_refactor_plan(gaps: List[GapMatrixItem]) -> List[Dict]:
+from ciel.schemas.gap_report import GapMatrixItem
+from ciel.schemas.refactor_plan import RefactorPlan, RefactorStep
+from ciel.inference.model_router import route_inference
+from ciel.orchestrator.purpose_resolver import extract_json_block
+
+logger = logging.getLogger(__name__)
+
+def generate_refactor_plan(gaps: List[GapMatrixItem], target_gap_id: Optional[str] = None) -> List[RefactorPlan]:
     """Generates a step-by-step refactoring plan based on technical debt gaps."""
-    plan = []
+    plans = []
     
+    # Filtrar gaps que requieren refactorización
     debt_items = [g for g in gaps if g.status in ("technical_debt", "roadmap_gap") or g.classification == "missing_feature"]
     
-    for i, item in enumerate(debt_items):
-        plan.append({
-            "step": i + 1,
-            "target_claim": item.claim,
-            "action": f"Implement or fix {item.claim}",
-            "command": f"echo 'Scaffold command to resolve: {item.claim}'"  # Scaffold
-        })
+    for gap in debt_items:
+        if target_gap_id and gap.claim_id != target_gap_id:
+            continue
+            
+        prompt = f"""
+        You are an expert software architect.
+        Generate a detailed, step-by-step refactoring plan to resolve this implementation gap.
         
-    return plan
+        Gap ID: {gap.claim_id}
+        Gap Claim: {gap.claim}
+        Current Status: {gap.status}
+        Severity: {gap.severity}
+        Interpretation: {gap.interpretation}
+        Recommended Action: {gap.recommended_action}
+        
+        Return ONLY a JSON object matching this exact structure:
+        {{
+            "plan_id": "refactor_xxx",
+            "target_gap_id": "{gap.claim_id}",
+            "risk": "low" (or "medium" or "high"),
+            "steps": [
+                {{
+                    "order": 1,
+                    "action": "modify_file",
+                    "path": "path/to/file",
+                    "reason": "why this step is needed",
+                    "evidence_id": "optional evidence or gap id"
+                }}
+            ],
+            "suggested_tests": ["test case description"]
+        }}
+        """
+        
+        try:
+            resp = route_inference(prompt)
+            if resp.startswith("Error"):
+                raise ValueError("LLM inference failed or disabled.")
+                
+            data = json.loads(extract_json_block(resp))
+            if "plan_id" not in data:
+                data["plan_id"] = f"refactor_{uuid.uuid4().hex[:8]}"
+            if "target_gap_id" not in data:
+                data["target_gap_id"] = gap.claim_id
+                
+            plan = RefactorPlan(**data)
+            plans.append(plan)
+        except Exception as e:
+            logger.warning("LLM planning failed for gap %s: %s", gap.claim_id, e)
+            fallback_plan = RefactorPlan(
+                plan_id=f"refactor_fallback_{uuid.uuid4().hex[:8]}",
+                target_gap_id=gap.claim_id,
+                risk="medium",
+                steps=[
+                    RefactorStep(
+                        order=1,
+                        action="modify_file",
+                        path="unknown",
+                        reason=f"Fallback: {gap.recommended_action}",
+                        evidence_id=gap.claim_id
+                    )
+                ],
+                suggested_tests=[f"Verify {gap.claim}"]
+            )
+            plans.append(fallback_plan)
+            
+    return plans

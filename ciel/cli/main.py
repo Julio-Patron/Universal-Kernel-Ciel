@@ -118,6 +118,47 @@ def purpose(prompt: str = typer.Argument(..., help="Prompt para resolver el prop
     purpose_obj = resolve_purpose(prompt)
     typer.echo(purpose_obj.model_dump_json(indent=2))
 
+@app.command("plan-refactor")
+def plan_refactor(
+    path: Path = typer.Argument(..., help="Path to the repository"),
+    gap: str = typer.Option(None, "--gap", help="ID del gap a resolver"),
+    scope: str = typer.Option(None, "--scope", help="Boundary ID para filtrar")
+):
+    """Genera un plan de refactorización detallado para los gaps detectados."""
+    from ciel.rag.file_scanner import scan_repository
+    from ciel.orchestrator.source_role_assignment import assign_role
+    from ciel.rag.evidence_extractor import extract_evidence
+    from ciel.skills.detect_implementation_gap import detect_gap
+    from ciel.skills.detect_product_boundaries import identify_boundaries
+    from ciel.skills.auto_refactor_planner import generate_refactor_plan
+    
+    boundaries = identify_boundaries(path)
+    files = scan_repository(path)
+    roles = [assign_role(f, path, boundaries) for f in files]
+    
+    if scope:
+        roles = [r for r in roles if r.boundary_id == scope or (scope in (r.boundary_id or ""))]
+        
+    bundle = extract_evidence(path, roles)
+    gap_matrix = detect_gap(bundle)
+    
+    typer.secho("\n[COGNITIVE CYCLE] Generating Refactor Plan...", fg=typer.colors.CYAN)
+    
+    plans = generate_refactor_plan(gap_matrix, target_gap_id=gap)
+    
+    if not plans:
+        typer.secho("   [OK] No unresolved gaps found or specific gap not found.", fg=typer.colors.GREEN)
+        return
+        
+    for p in plans:
+        typer.secho(f"\n>> Plan: {p.plan_id} (Target: {p.target_gap_id} | Risk: {p.risk})", fg=typer.colors.YELLOW, bold=True)
+        for step in p.steps:
+            typer.echo(f"   {step.order}. [{step.action}] {step.path} - {step.reason}")
+        if p.suggested_tests:
+            typer.echo("   Suggested Tests:")
+            for t in p.suggested_tests:
+                typer.echo(f"   - {t}")
+
 @app.command()
 def sources(path: Path = typer.Argument(..., help="Path to the repository")):
     """Muestra el Source Role Assignment para el repositorio."""
