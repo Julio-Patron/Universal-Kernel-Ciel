@@ -13,6 +13,9 @@ Ollama can improve semantic extraction when available, but deterministic fallbac
 - Evidence extraction from source code and project metadata.
 - Gap detection with specific evidence IDs.
 - Repository maturity scoring based on claims, implementation evidence, tests, and operational manifests.
+- Multi-product boundary detection for monorepos.
+- Policy Rulesets enforcement (YAML based governance).
+- Automated Safe Patch Generation and step-by-step refactoring plans.
 - Offline-safe fallback mode for CI and machines without Ollama.
 
 ## Install
@@ -25,10 +28,13 @@ pip install -e .
 
 ```bash
 ciel analyze ./path/to/repo
+ciel analyze ./path/to/repo --scope frontend --ruleset release-readiness
 ciel report ./path/to/repo --format markdown
 ciel gap ./path/to/repo
 ciel sources ./path/to/repo
 ciel purpose "audit this repo for release readiness"
+ciel plan-refactor ./path/to/repo --gap <id>
+ciel propose-patch ./path/to/repo --gap <id>
 ```
 
 ## Runtime configuration
@@ -57,3 +63,4 @@ CIEL_DISABLE_LLM=1 CIEL_ENABLE_EXEC=0 python -m pytest
 - `ciel/schemas/`: Pydantic schemas for purpose, evidence, and reports.
 - `ciel/inference/`: local inference adapters.
 - `ciel/executor/`: approval-gated command and filesystem helpers.
+- `ciel/patches/`: safe diff generation and step validation logic.
