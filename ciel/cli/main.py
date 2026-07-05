@@ -159,6 +159,55 @@ def plan_refactor(
             for t in p.suggested_tests:
                 typer.echo(f"   - {t}")
 
+@app.command("propose-patch")
+def propose_patch(
+    path: Path = typer.Argument(..., help="Path to the repository"),
+    gap: str = typer.Option(..., "--gap", help="ID del gap a resolver")
+):
+    """Genera un parche (.patch) seguro sugerido para un plan de refactorización."""
+    from ciel.rag.file_scanner import scan_repository
+    from ciel.orchestrator.source_role_assignment import assign_role
+    from ciel.rag.evidence_extractor import extract_evidence
+    from ciel.skills.detect_implementation_gap import detect_gap
+    from ciel.skills.detect_product_boundaries import identify_boundaries
+    from ciel.skills.auto_refactor_planner import generate_refactor_plan
+    from ciel.patches.patch_planner import propose_patches
+    
+    boundaries = identify_boundaries(path)
+    files = scan_repository(path)
+    roles = [assign_role(f, path, boundaries) for f in files]
+    bundle = extract_evidence(path, roles)
+    gap_matrix = detect_gap(bundle)
+    
+    typer.secho("\n[COGNITIVE CYCLE] Planning & Proposing Patch...", fg=typer.colors.CYAN)
+    plans = generate_refactor_plan(gap_matrix, target_gap_id=gap)
+    
+    if not plans:
+        typer.secho(f"   [ERROR] No gap found matching {gap} that requires action.", fg=typer.colors.RED)
+        raise typer.Exit(1)
+        
+    plan = plans[0]
+    typer.secho(f"\n>> Analyzing Plan: {plan.plan_id} (Risk: {plan.risk})", fg=typer.colors.YELLOW)
+    
+    patches = propose_patches(plan, path)
+    
+    for p in patches:
+        step = p["step"]
+        safety = p["safety"]
+        typer.secho(f"\n--- Step {step['order']}: {step['action']} on {step['path']} ---", fg=typer.colors.MAGENTA)
+        typer.echo(f"Reason: {step['reason']}")
+        
+        if not safety["safe"]:
+            typer.secho(f"[BLOCKED] Safety Review Failed: {safety['reason']}", fg=typer.colors.RED, bold=True)
+        else:
+            typer.secho(f"[SAFE] {safety['reason']}", fg=typer.colors.GREEN)
+            typer.echo("\nProposed Diff:")
+            typer.echo("```diff")
+            typer.echo(p["diff"])
+            typer.echo("```")
+            
+    typer.secho("\n[OK] Patch generation complete. Review the diffs above. Auto-merge is disabled.", fg=typer.colors.CYAN)
+
 @app.command()
 def sources(path: Path = typer.Argument(..., help="Path to the repository")):
     """Muestra el Source Role Assignment para el repositorio."""
