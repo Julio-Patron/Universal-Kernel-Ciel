@@ -39,3 +39,5 @@ class ImplementationGapReport(BaseModel):
     maturity_score: MaturityScore
     verdict: Verdict
     next_actions: List[NextAction]
+    ruleset_id: str | None = None
+    ruleset_hash: str | None = None

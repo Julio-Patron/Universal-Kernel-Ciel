@@ -6,7 +6,8 @@ app = typer.Typer(help="Ciel Kernel V0 CLI")
 @app.command()
 def analyze(
     path: Path = typer.Argument(..., help="Path to the repository to analyze"),
-    scope: str = typer.Option(None, "--scope", help="Filtrar por ID de boundary (ej. frontend, backend)")
+    scope: str = typer.Option(None, "--scope", help="Filtrar por ID de boundary (ej. frontend, backend)"),
+    ruleset: str = typer.Option(None, "--ruleset", help="ID del ruleset a aplicar (ej. agent-safe-repo)")
 ):
     """Ejecuta el análisis completo del repositorio a través del ciclo cognitivo V2."""
     from ciel.rag.file_scanner import scan_repository
@@ -17,10 +18,21 @@ def analyze(
     from ciel.orchestrator.purpose_resolver import resolve_purpose
     from ciel.memory.decision_ledger import DecisionLedger
     from ciel.skills.detect_product_boundaries import identify_boundaries
+    from ciel.skills.load_rulesets import load_ruleset
     import time
     
     ledger = DecisionLedger(path)
     
+    active_ruleset = None
+    if ruleset:
+        typer.echo(f"\n>> Phase -1: Loading Policy Ruleset '{ruleset}'...")
+        try:
+            active_ruleset = load_ruleset(ruleset, search_paths=[path / "rulesets", Path.cwd() / "rulesets"])
+            typer.secho(f"   [OK] Loaded {active_ruleset.id} (hash: {active_ruleset.hash[:8]})", fg=typer.colors.GREEN)
+        except Exception as e:
+            typer.secho(f"   [ERROR] {e}", fg=typer.colors.RED)
+            raise typer.Exit(1)
+            
     typer.secho("\n[COGNITIVE CYCLE START] Initializing Ciel V2 Intelligence Layer...", fg=typer.colors.CYAN, bold=True)
     
     typer.echo("\n>> Phase 0: Map Product Boundaries...")
@@ -64,10 +76,10 @@ def analyze(
     
     # Phase 13 & 14: Gap Detection & Maturity Audit
     typer.echo("\n>> Phase 13 & 14: Semantic Reasoning & Gap Auditing...")
-    report = orchestrate_reasoning(bundle)
+    report = orchestrate_reasoning(bundle, ruleset=active_ruleset)
     ledger.record_decision(
         "maturity_audit",
-        context={"bundle_size": len(bundle.implementation_facts)},
+        context={"bundle_size": len(bundle.implementation_facts), "ruleset": active_ruleset.id if active_ruleset else None},
         decision={"maturity_score": report.maturity_score.model_dump(), "verdict": report.verdict.model_dump()}
     )
     
@@ -140,7 +152,8 @@ def gap(path: Path = typer.Argument(..., help="Path to the repository")):
 @app.command()
 def report(
     path: Path = typer.Argument(..., help="Path to the repository"),
-    format: str = typer.Option("markdown", "--format", help="Formato de salida (json o markdown)")
+    format: str = typer.Option("markdown", "--format", help="Formato de salida (json o markdown)"),
+    ruleset: str = typer.Option(None, "--ruleset", help="ID del ruleset a aplicar")
 ):
     """Exporta el reporte del análisis."""
     from ciel.rag.file_scanner import scan_repository
@@ -148,12 +161,18 @@ def report(
     from ciel.rag.evidence_extractor import extract_evidence
     from ciel.orchestrator.reasoning_orchestrator import orchestrate_reasoning
     from ciel.cli.render import render_json, render_markdown
+    from ciel.skills.load_rulesets import load_ruleset
+    
+    active_ruleset = None
+    if ruleset:
+        active_ruleset = load_ruleset(ruleset, search_paths=[path / "rulesets", Path.cwd() / "rulesets"])
+
     
     files = scan_repository(path)
     roles = [assign_role(f, path) for f in files]
     bundle = extract_evidence(path, roles)
     
-    report_obj = orchestrate_reasoning(bundle)
+    report_obj = orchestrate_reasoning(bundle, ruleset=active_ruleset)
     
     if format.lower() == "json":
         typer.echo(render_json(report_obj))

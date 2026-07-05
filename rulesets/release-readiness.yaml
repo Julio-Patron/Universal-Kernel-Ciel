@@ -1,0 +1,7 @@
+id: release-readiness
+version: 1.0.0
+required:
+  - tests_present
+  - ci_present
+thresholds:
+  maturity_score_min: 0.90
