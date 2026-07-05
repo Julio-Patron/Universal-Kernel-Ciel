@@ -10,6 +10,7 @@ class SourceFile(BaseModel):
     path: str
     role: str
     confidence: float
+    boundary_id: Optional[str] = None
 
 class IntentionClaim(BaseModel):
     id: str

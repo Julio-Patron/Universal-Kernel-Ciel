@@ -4,7 +4,10 @@ from pathlib import Path
 app = typer.Typer(help="Ciel Kernel V0 CLI")
 
 @app.command()
-def analyze(path: Path = typer.Argument(..., help="Path to the repository to analyze")):
+def analyze(
+    path: Path = typer.Argument(..., help="Path to the repository to analyze"),
+    scope: str = typer.Option(None, "--scope", help="Filtrar por ID de boundary (ej. frontend, backend)")
+):
     """Ejecuta el análisis completo del repositorio a través del ciclo cognitivo V2."""
     from ciel.rag.file_scanner import scan_repository
     from ciel.orchestrator.source_role_assignment import assign_role
@@ -13,11 +16,20 @@ def analyze(path: Path = typer.Argument(..., help="Path to the repository to ana
     from ciel.cli.render import render_terminal
     from ciel.orchestrator.purpose_resolver import resolve_purpose
     from ciel.memory.decision_ledger import DecisionLedger
+    from ciel.skills.detect_product_boundaries import identify_boundaries
     import time
     
     ledger = DecisionLedger(path)
     
     typer.secho("\n[COGNITIVE CYCLE START] Initializing Ciel V2 Intelligence Layer...", fg=typer.colors.CYAN, bold=True)
+    
+    typer.echo("\n>> Phase 0: Map Product Boundaries...")
+    boundaries = identify_boundaries(path)
+    ledger.record_decision(
+        "boundary_detection",
+        context={"repo_path": str(path)},
+        decision={"boundaries": [b.model_dump() for b in boundaries]}
+    )
     
     # Phase 11: Purpose Resolution
     typer.echo("\n>> Phase 11: Resolving Project Purpose from Documentation...")
@@ -36,7 +48,12 @@ def analyze(path: Path = typer.Argument(..., help="Path to the repository to ana
     # Phase 12: Evidence Extraction
     typer.echo("\n>> Phase 12: Extracting Implementation Facts from Reality...")
     files = scan_repository(path)
-    roles = [assign_role(f, path) for f in files]
+    roles = [assign_role(f, path, boundaries) for f in files]
+    
+    if scope:
+        roles = [r for r in roles if r.boundary_id == scope or (scope in (r.boundary_id or ""))]
+        typer.secho(f"   [!] Scope filtering applied: '{scope}'. Kept {len(roles)} files.", fg=typer.colors.YELLOW)
+        
     bundle = extract_evidence(path, roles)
     ledger.record_decision(
         "evidence_extraction",
@@ -58,6 +75,28 @@ def analyze(path: Path = typer.Argument(..., help="Path to the repository to ana
     typer.secho(f"\n[COGNITIVE CYCLE COMPLETE] Finished in {elapsed:.2f}s.\n", fg=typer.colors.CYAN, bold=True)
     
     render_terminal(report)
+
+@app.command()
+def boundaries(path: Path = typer.Argument(..., help="Path to the repository")):
+    """Muestra el mapa de fronteras de producto (boundaries) del repositorio."""
+    from ciel.skills.detect_product_boundaries import identify_boundaries
+    from ciel.memory.decision_ledger import DecisionLedger
+    import json
+    
+    ledger = DecisionLedger(path)
+    typer.secho("\n[COGNITIVE CYCLE START] Detecting Product Boundaries...", fg=typer.colors.CYAN, bold=True)
+    
+    boundaries = identify_boundaries(path)
+    
+    ledger.record_decision(
+        "boundary_detection",
+        context={"repo_path": str(path)},
+        decision={"boundaries": [b.model_dump() for b in boundaries]}
+    )
+    
+    typer.secho(f"   [OK] Detected {len(boundaries)} boundaries.", fg=typer.colors.GREEN)
+    output = [b.model_dump() for b in boundaries]
+    typer.echo(json.dumps(output, indent=2))
 
 @app.command()
 def purpose(prompt: str = typer.Argument(..., help="Prompt para resolver el propósito")):
