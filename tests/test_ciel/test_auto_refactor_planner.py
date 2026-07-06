@@ -40,6 +40,10 @@ def test_generate_refactor_plan_fallback(mock_gaps, monkeypatch):
     assert plans[0].target_gap_id == "gap-001"
     assert len(plans[0].steps) == 1
     assert plans[0].steps[0].action == "modify_file"
+    assert plans[0].steps[0].path == "ciel/memory/decision_ledger.py"
+    assert plans[0].steps[0].evidence_id == "gap-001"
+    assert plans[0].risk == "high"
+    assert plans[0].suggested_tests
 
 def test_generate_refactor_plan_with_target(mock_gaps, monkeypatch):
     def mock_route_inference(prompt):

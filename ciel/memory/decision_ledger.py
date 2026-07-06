@@ -1,7 +1,8 @@
 import json
 import logging
+import subprocess
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -20,7 +21,7 @@ class DecisionLedger:
         self.repo_path = repo_path
         self.memory_dir = repo_path / ".ciel"
         self.log_path = self.memory_dir / "decisions.log"
-        self.version = "0.5.0"
+        self.version = "0.9.0"
         
     def _ensure_dir(self):
         self.memory_dir.mkdir(parents=True, exist_ok=True)
@@ -45,7 +46,25 @@ class DecisionLedger:
         except Exception:
             return "0" * 64
 
-    def record_decision(self, event_type: str, context: Any, decision: Any, commit_sha: str = "unknown") -> Optional[Dict[str, Any]]:
+    def _resolve_commit_sha(self) -> str:
+        """Resolve the current Git commit without making Git a requirement."""
+        try:
+            result = subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                cwd=self.repo_path,
+                capture_output=True,
+                text=True,
+                timeout=5,
+                check=False,
+            )
+            sha = result.stdout.strip()
+            if result.returncode == 0 and sha:
+                return sha
+        except (OSError, subprocess.SubprocessError):
+            pass
+        return "unknown"
+
+    def record_decision(self, event_type: str, context: Any, decision: Any, commit_sha: Optional[str] = None) -> Optional[Dict[str, Any]]:
         """Appends a cryptographically linked decision to the ledger."""
         if CielSettings.from_env().disable_memory:
             return None
@@ -58,9 +77,9 @@ class DecisionLedger:
         
         entry = {
             "id": f"decision_{uuid.uuid4().hex}",
-            "timestamp": datetime.now().isoformat(),
-            "repo": self.repo_path.name,
-            "commit_sha": commit_sha,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "repo": self.repo_path.resolve().name or "unknown",
+            "commit_sha": commit_sha or self._resolve_commit_sha(),
             "event_type": event_type,
             "input_hash": context_hash,
             "output_hash": decision_hash,

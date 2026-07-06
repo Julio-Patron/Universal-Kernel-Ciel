@@ -1,5 +1,11 @@
 Sí. Tomando los hallazgos de la auditoría, yo ordenaría el roadmap así: **primero cerrar operación/distribución**, luego **BYOK**, luego **memoria/ledger**, después **monorepo boundary detection**, y hasta el final **auto-refactor planner**. El planner depende de que Ciel ya entienda contexto, historial y boundaries; si lo haces antes, saldrá superficial. La auditoría marca como gaps principales: BYOK/cloud fallback, `decisions.log`, multi-product boundary detection, auto-refactor planner, PyPI, tests incompletos, CI duplicado, coverage y tooling. 
 
+## Estado de release al 2026-07-05
+
+- `v0.9.0` es el release de Safe Patch Generation: propone diffs revisables y no aplica cambios automáticamente.
+- `v1.0.0-rc1` queda reservado para Agent Trust Gate y signed attestations, incluyendo `ciel attest` y `ciel verify-attestation`.
+- `v1.0.0` estable solo se publicará después de probar satisfactoriamente el RC. Mientras esos comandos y sus garantías criptográficas no existan, v1 no está completo.
+
 # Roadmap hacia v1.0.0
 
 ## Fase 0 — Release ops inmediato: `v0.3.1`

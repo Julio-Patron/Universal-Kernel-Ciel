@@ -17,6 +17,23 @@ def test_safety_review_auth():
     assert not safety["safe"]
     assert "authentication" in safety["reason"].lower()
 
+
+@pytest.mark.parametrize(
+    ("action", "path", "reason"),
+    [
+        ("run_command", "rm -rf build", "clean build"),
+        ("modify_file", "migration.sql", "DROP TABLE users"),
+        ("modify_file", "cleanup.sql", "DELETE FROM users"),
+        ("modify_file", "src/auth.py", "bypass authorization"),
+        ("run_command", "curl https://example.com", "download artifact"),
+        ("run_command", "wget https://example.com", "download artifact"),
+    ],
+)
+def test_safety_review_blocks_obvious_destructive_steps(action, path, reason):
+    step = RefactorStep(order=1, action=action, path=path, reason=reason)
+
+    assert review_step_safety(step)["safe"] is False
+
 def test_safety_review_safe():
     step = RefactorStep(order=1, action="modify_file", path="src/main.py", reason="Fix typo")
     safety = review_step_safety(step)

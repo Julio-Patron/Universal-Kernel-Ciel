@@ -46,6 +46,7 @@ coverage.xml
 *.cover
 *.sdist
 .pytest_cache/
+.tmp/
 pytest-debug.log
 
 # Virtual environments
@@ -57,6 +58,8 @@ venv.bak/
 .venv/
 
 # Ciel Kernel specific
+.ciel/
+*.log
 memory/decisions.log
 memory/project_profiles/*.json
 !memory/project_profiles/.gitkeep

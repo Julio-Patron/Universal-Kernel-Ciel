@@ -5,7 +5,13 @@ from typing import Optional
 from ciel.config import CielSettings
 
 def _handle_error(exc: Exception, provider: str) -> str:
-    return f"Error connecting to cloud inference ({provider}): {exc}"
+    # Exception messages from HTTP clients may contain request URLs. Gemini
+    # authenticates in its query string, so returning/logging the raw message
+    # could expose the caller's API key.
+    return (
+        f"Error connecting to cloud inference ({provider}): "
+        f"request failed ({type(exc).__name__})"
+    )
 
 def query_openai(prompt: str, settings: CielSettings) -> str:
     url = "https://api.openai.com/v1/chat/completions"

@@ -37,6 +37,13 @@ def test_load_ruleset_not_found(mock_rulesets_dir):
     with pytest.raises(FileNotFoundError):
         load_ruleset("non-existent-ruleset", search_paths=[mock_rulesets_dir])
 
+
+def test_load_invalid_ruleset_fails_clearly(mock_rulesets_dir):
+    (mock_rulesets_dir / "invalid.yaml").write_text("- not\n- a\n- mapping\n")
+
+    with pytest.raises(ValueError, match="Formato YAML inválido"):
+        load_ruleset("invalid", search_paths=[mock_rulesets_dir])
+
 def test_audit_maturity_with_ruleset(mock_rulesets_dir):
     ruleset = load_ruleset("agent-safe-repo", search_paths=[mock_rulesets_dir])
     

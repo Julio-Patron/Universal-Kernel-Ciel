@@ -56,3 +56,35 @@ def test_identify_boundaries_heuristic(mock_monorepo, monkeypatch):
     assert infra_b.language == "Dockerfile"
     assert infra_b.role == "infrastructure"
     assert "deploy" in infra_b.path
+
+
+def test_all_supported_markers_and_ignored_directories(tmp_path, monkeypatch):
+    monkeypatch.setattr(
+        "ciel.skills.detect_product_boundaries.route_inference", lambda prompt: "[]"
+    )
+    markers = [
+        "package.json",
+        "pyproject.toml",
+        "requirements.txt",
+        "go.mod",
+        "Cargo.toml",
+        "Dockerfile",
+        "pom.xml",
+        "build.gradle",
+    ]
+    for index, marker in enumerate(markers):
+        component = tmp_path / f"component-{index}"
+        component.mkdir()
+        (component / marker).write_text("", encoding="utf-8")
+
+    for ignored in (".git", "node_modules", ".venv", "venv", "dist", "build"):
+        directory = tmp_path / ignored / "hidden-product"
+        directory.mkdir(parents=True)
+        (directory / "package.json").write_text("{}", encoding="utf-8")
+
+    boundaries = identify_boundaries(tmp_path)
+
+    assert len(boundaries) == len(markers)
+    assert {boundary.id for boundary in boundaries} == {
+        f"component-{index}" for index in range(len(markers))
+    }
