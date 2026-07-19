@@ -53,13 +53,13 @@ def execute_command(
 ) -> dict:
     """Execute an allowlisted command without invoking a shell.
 
-    Execution is disabled unless CIEL_ENABLE_EXEC=1 is set. This keeps the audit
+    Execution is disabled unless CIEL_GATE_ENABLE_EXEC=1 is set. This keeps the audit
     pipeline safe by default and prevents LLM-generated strings from being run
     as shell scripts.
     """
     runtime = settings or CielSettings.from_env()
-    if not runtime.enable_shell:
-        return {"status": "denied", "output": "Command execution is disabled. Set CIEL_ENABLE_EXEC=1 to enable it."}
+    if not runtime.enable_exec:
+        return {"status": "denied", "output": "Command execution is disabled. Set CIEL_GATE_ENABLE_EXEC=1 to enable it."}
 
     argv = _parse_command(command)
     allowed, reason = _is_allowed(argv, runtime.allowed_commands)
@@ -78,7 +78,7 @@ def execute_command(
             check=False,
             capture_output=True,
             text=True,
-            timeout=runtime.shell_timeout_seconds,
+            timeout=runtime.exec_timeout_seconds,
         )
         status = "success" if result.returncode == 0 else "error"
         output = result.stdout if result.returncode == 0 else result.stderr

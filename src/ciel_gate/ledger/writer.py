@@ -19,9 +19,10 @@ class DecisionLedger:
     
     def __init__(self, repo_path: Path):
         self.repo_path = repo_path
-        self.memory_dir = repo_path / ".ciel"
-        self.log_path = self.memory_dir / "decisions.log"
-        self.version = "0.9.0"
+        self.settings = CielSettings.from_env()
+        self.log_path = repo_path / self.settings.ledger_path
+        self.memory_dir = self.log_path.parent
+        self.version = "1.0.0"
         
     def _ensure_dir(self):
         self.memory_dir.mkdir(parents=True, exist_ok=True)
@@ -66,8 +67,6 @@ class DecisionLedger:
 
     def record_decision(self, event_type: str, context: Any, decision: Any, commit_sha: Optional[str] = None) -> Optional[Dict[str, Any]]:
         """Appends a cryptographically linked decision to the ledger."""
-        if CielSettings.from_env().disable_memory:
-            return None
             
         self._ensure_dir()
         prev_hash = self.get_last_hash()
@@ -84,7 +83,7 @@ class DecisionLedger:
             "input_hash": context_hash,
             "output_hash": decision_hash,
             "previous_hash": prev_hash,
-            "ciel_version": self.version
+            "ciel_gate_version": self.version
         }
         
         entry["entry_hash"] = compute_entry_hash(entry)

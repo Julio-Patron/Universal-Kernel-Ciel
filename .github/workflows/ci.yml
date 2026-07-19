@@ -16,8 +16,7 @@ jobs:
       matrix:
         python-version: ["3.10", "3.11"]
     env:
-      CIEL_DISABLE_LLM: "1"
-      CIEL_ENABLE_EXEC: "0"
+      CIEL_GATE_ENABLE_EXEC: "0"
 
     steps:
       - uses: actions/checkout@v4
@@ -33,7 +32,7 @@ jobs:
           python -m pip install -e ".[dev]"
 
       - name: Run tests
-        run: python -m pytest tests/ --cov=ciel --cov-fail-under=70
+        run: python -m pytest tests/ --cov=ciel_gate --cov-fail-under=70
 
       - name: Build distribution
         run: python -m build
