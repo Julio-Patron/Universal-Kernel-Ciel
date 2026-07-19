@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ciel-kernel"
-version = "0.9.0"
-description = "Ciel Kernel V0: Intelligence and Context Governance OS"
+name = "ciel-gate"
+version = "1.0.0"
+description = "Agent Change Control / Policy Firewall for Coding Agents"
 authors = [{ name = "JPatronC92" }]
 readme = "README.md"
 requires-python = ">=3.10"
@@ -22,11 +22,14 @@ dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.1.0",
     "twine>=5.0.0",
+    "ruff",
+    "mypy"
 ]
+explain = []
 
 [project.scripts]
-ciel = "ciel.cli.main:app"
+ciel-gate = "ciel_gate.cli:app"
 
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["core*", "ciel*", "skills*", "memory*"]
+where = ["src"]
+include = ["ciel_gate*"]
