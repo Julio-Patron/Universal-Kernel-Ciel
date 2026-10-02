@@ -1,84 +1,64 @@
-# Ciel Kernel 🧠⚙️
+# Ciel Gate
 
-[![CI](https://github.com/JPatronC92/universal-ai-kernel/actions/workflows/ci.yml/badge.svg)](https://github.com/JPatronC92/universal-ai-kernel/actions/workflows/ci.yml)
+**Categoría:** Agent Change Control / Policy Firewall for Coding Agents.
 
-Ciel Kernel is a local-first repository audit CLI for comparing documented intent against code reality. It scans a repository, classifies files, extracts implementation evidence, detects gaps, and emits structured reports.
+> **Un firewall local de cambios para agentes de programación:** recibe un diff o comando propuesto por un agente, aplica políticas deterministas, exige aprobación cuando corresponde, ejecuta validaciones bajo allowlist y registra la decisión en un ledger resistente a manipulación.
 
-Local or cloud inference can improve semantic extraction when available, but deterministic fallbacks are part of the core contract. Cloud inference is optional and uses bring-your-own-key (BYOK) credentials.
+## Lo único que hace
 
-## Features
+> **Decide si un cambio propuesto por un agente puede entrar al repositorio.**
 
-- Purpose resolution from prompts and repository documentation.
-- Evidence extraction from source code and project metadata.
-- Gap detection with specific evidence IDs.
-- Repository maturity scoring based on claims, implementation evidence, tests, and operational manifests.
-- Multi-product boundary detection for monorepos.
-- Policy Rulesets enforcement (YAML based governance).
-- Automated Safe Patch Generation and step-by-step refactoring plans.
-- Offline-safe fallback mode for CI and machines without Ollama.
+Entrada:
+* diff unificado;
+* identidad del agente;
+* commit base;
+* rutas modificadas;
+* política YAML;
+* checks permitidos.
 
-## Install before the PyPI release
+Salida:
+* `allow`;
+* `deny`;
+* `require_approval`;
+* explicación estructurada;
+* evidencia de validación;
+* entrada criptográfica en el ledger.
 
-```bash
-pip install -e .
-```
+## CLI 1.0
 
-After `v0.9.0` is published to PyPI, installation will be:
-
-```bash
-pip install ciel-kernel
-```
-
-## Run
+Solo cuatro comandos:
 
 ```bash
-ciel analyze ./path/to/repo
-ciel analyze ./path/to/repo --scope frontend --ruleset release-readiness
-ciel boundaries ./path/to/repo
-ciel report ./path/to/repo --format markdown
-ciel gap ./path/to/repo
-ciel sources ./path/to/repo
-ciel purpose "audit this repo for release readiness"
-ciel plan-refactor ./path/to/repo --gap <id>
-ciel propose-patch ./path/to/repo --gap <id>
-ciel memory init ./path/to/repo
-ciel memory status ./path/to/repo
-ciel memory verify ./path/to/repo
+ciel-gate init
+ciel-gate check
+ciel-gate ledger verify
+ciel-gate policy validate
 ```
 
-## Runtime configuration
+Exit codes:
+* 0  allow
+* 2  require_approval
+* 3  deny
+* 4  input_or_policy_error
+* 5  required_check_failed
+
+Esto permite integrarlo directamente en agentes, Git hooks y CI.
+
+## Variables de entorno opcionales
+
+Ciel Gate debe funcionar offline inmediatamente.
 
 ```bash
-CIEL_OLLAMA_URL=http://localhost:11434
-CIEL_OLLAMA_MODEL=llama3
-CIEL_LLM_PROVIDER=auto
-CIEL_LLM_TIMEOUT=10
-CIEL_DISABLE_LLM=0
-CIEL_OPENAI_API_KEY=
-CIEL_OPENAI_MODEL=gpt-4o-mini
-CIEL_ANTHROPIC_API_KEY=
-CIEL_ANTHROPIC_MODEL=claude-3-5-haiku-latest
-CIEL_GEMINI_API_KEY=
-CIEL_GEMINI_MODEL=gemini-1.5-flash
-CIEL_ENABLE_EXEC=0
-CIEL_EXEC_TIMEOUT=30
+CIEL_GATE_ENABLE_EXEC=0
+CIEL_GATE_ALLOWED_COMMANDS=pytest,python,git
+CIEL_GATE_EXEC_TIMEOUT=30
+CIEL_GATE_LEDGER_PATH=.ciel/decisions.log
+CIEL_GATE_REQUIRE_APPROVAL_TTY=1
 ```
 
-`CIEL_LLM_PROVIDER` accepts `auto`, `local`, `cloud`, or `deterministic`. In `auto` mode, configured cloud credentials are tried before local Ollama. API keys remain runtime-only and are not written to reports or the decision ledger.
+## Valor diferencial
 
-Deterministic/offline CI does not require Ollama or API keys:
-
-```bash
-CIEL_DISABLE_LLM=1 CIEL_ENABLE_EXEC=0 python -m pytest
-```
-
-## Core structure
-
-- `ciel/cli/`: Typer CLI entrypoints.
-- `ciel/rag/`: repository scanning and evidence extraction.
-- `ciel/orchestrator/`: purpose and reasoning orchestration.
-- `ciel/skills/`: gap detection, maturity audit, product boundary detection, and planning helpers.
-- `ciel/schemas/`: Pydantic schemas for purpose, evidence, and reports.
-- `ciel/inference/`: local and optional BYOK cloud inference adapters.
-- `ciel/executor/`: approval-gated command and filesystem helpers.
-- `ciel/patches/`: safe diff generation and step validation logic.
+* **Modelo agnóstico**: No importa si el cambio proviene de Codex, Claude Code, Cursor, Copilot, un MCP o un script interno.
+* **Local-first y determinista**: La decisión crítica no depende de enviar el repositorio a un proveedor ni de confiar en que un LLM interprete correctamente el riesgo.
+* **Trazabilidad resistente a alteraciones**: El ledger demuestra qué diff se evaluó, contra qué política y commit.
+* **Fricción B2A casi cero**: Un agente ejecuta un comando, consume JSON y respeta el exit code.
